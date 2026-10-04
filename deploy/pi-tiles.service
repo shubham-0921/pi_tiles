@@ -1,0 +1,13 @@
+[Unit]
+Description=Pi Tiles static server
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/pi-tiles
+ExecStart=/usr/bin/python3 -m http.server 8080 --bind 127.0.0.1
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

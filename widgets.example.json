@@ -1,0 +1,35 @@
+{
+  "idleTimeoutSeconds": 75,
+  "nightMode": { "start": "23:00", "end": "07:00" },
+  "widgets": [
+    {
+      "id": "clock",
+      "name": "Clock",
+      "icon": "🕐",
+      "type": "clock",
+      "durationSeconds": 20,
+      "refreshMinutes": 0,
+      "inRotation": true
+    },
+    {
+      "id": "bolkar",
+      "name": "Bolkar",
+      "icon": "🎙",
+      "type": "iframe",
+      "url": "https://bolkar-lac.vercel.app/analytics/full?key=YOUR_KEY_HERE&kiosk=1",
+      "durationSeconds": 20,
+      "refreshMinutes": 10,
+      "inRotation": true
+    },
+    {
+      "id": "trace",
+      "name": "Trace",
+      "icon": "🏃",
+      "type": "iframe",
+      "url": "https://google-fitbit.vercel.app/running?kiosk=1",
+      "durationSeconds": 20,
+      "refreshMinutes": 10,
+      "inRotation": true
+    }
+  ]
+}

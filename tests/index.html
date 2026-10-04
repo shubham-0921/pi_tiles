@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Pi Tiles tests</title>
+<body style="font-family:monospace;background:#111;color:#eee"><pre id="out"></pre>
+<script type="module">
+  import { register } from './suite.js';
+  const out = document.getElementById('out');
+  const assert = {
+    equal(a, b) { if (a !== b) throw new Error(`expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`); },
+    deepEqual(a, b) { if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error(`expected ${JSON.stringify(b)}, got ${JSON.stringify(a)}`); },
+    ok(v) { if (!v) throw new Error('expected truthy'); },
+  };
+  let pass = 0, fail = 0;
+  register((name, fn) => {
+    try { fn(); pass++; out.textContent += `✓ ${name}\n`; }
+    catch (e) { fail++; out.textContent += `✗ ${name}\n    ${e.message}\n`; }
+  }, assert);
+  out.textContent += `\n${pass} passed, ${fail} failed\n`;
+  document.title = fail ? 'FAIL' : 'PASS';
+</script>

@@ -1,0 +1,189 @@
+/* Designed for 800x480, scales to 1280x720. No blur, shadows, or looping animations. */
+:root {
+  --bg: #0a0c10;
+  --panel: #151a21;
+  --panel-active: #1e2936;
+  --text: #f1f4f8;
+  --muted: #98a2b3;
+  --accent: #4cc2ff;
+  --bar-h: 64px;
+}
+
+* { box-sizing: border-box; cursor: none; }
+body.show-cursor, body.show-cursor * { cursor: auto; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+}
+
+#stage {
+  position: fixed;
+  inset: 0 0 var(--bar-h) 0;
+  overflow: hidden;
+}
+
+.slide { position: absolute; inset: 0; background: var(--bg); }
+
+/* --- iframe widgets */
+.frame-host, .frame-host iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--bg); }
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--bg);
+  text-align: center;
+  padding: 0 48px;
+}
+.overlay[hidden] { display: none; }
+
+.skel-icon { font-size: 56px; }
+.skel-name { font-size: 24px; color: var(--muted); }
+.skel-bar { width: 320px; height: 14px; border-radius: 7px; background: var(--panel); }
+.skel-bar.short { width: 200px; }
+
+.msg-text { font-size: 28px; line-height: 1.3; max-width: 640px; }
+.msg-actions { display: flex; gap: 16px; }
+.open-ext, .retry {
+  min-width: 160px;
+  min-height: 56px;
+  border: 0;
+  border-radius: 28px;
+  background: var(--accent);
+  color: #04202e;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* --- clock */
+.clock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.clock-time {
+  font-size: min(26vw, 42vh);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.clock-day { margin-top: 3vh; font-size: min(7vw, 9vh); font-weight: 500; }
+.clock-date { margin-top: 1vh; font-size: min(4.5vw, 6vh); color: var(--muted); }
+.clock-next {
+  position: absolute;
+  bottom: 2.5vh;
+  font-size: min(3.2vw, 4.5vh);
+  color: var(--muted);
+}
+
+/* --- swipe zones (transparent) */
+.swipe-zone {
+  position: fixed;
+  top: 0;
+  bottom: var(--bar-h);
+  width: 40px;
+  z-index: 10;
+  touch-action: none;
+}
+.swipe-zone.left { left: 0; }
+.swipe-zone.right { right: 0; }
+
+/* --- pause badge */
+#pause-badge {
+  position: fixed;
+  top: 10px;
+  right: 14px;
+  z-index: 20;
+  padding: 6px 14px;
+  border-radius: 16px;
+  background: var(--panel-active);
+  color: var(--text);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+#pause-badge[hidden] { display: none; }
+
+/* --- bottom bar */
+#bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--bar-h);
+  z-index: 30;
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: #07090c;
+}
+.pill {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--panel);
+  color: var(--muted);
+  font: inherit;
+  font-size: 18px;
+}
+.pill.active { background: var(--panel-active); color: var(--text); }
+.pill-icon { font-size: 22px; }
+.pill-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.fill {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 3px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: none;
+  visibility: hidden;
+}
+.pill.active .fill { visibility: visible; transition: transform 0.5s linear; }
+
+/* --- night mode: one flat translucent layer, no filters */
+#dim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+#dim.on { opacity: 0.75; }
+
+@media (min-width: 1100px) {
+  :root { --bar-h: 80px; }
+  .pill { min-height: 64px; font-size: 22px; border-radius: 32px; }
+  .pill-icon { font-size: 28px; }
+  .swipe-zone { width: 56px; }
+}

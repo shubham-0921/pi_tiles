@@ -1,0 +1,3 @@
+# Append to ~/.config/labwc/autostart
+# (older images ship `chromium-browser` instead of `chromium`)
+sleep 3 && chromium --kiosk --noerrdialogs --disable-infobars --disable-pinch --overscroll-history-navigation=0 --check-for-update-interval=31536000 http://localhost:8080 &
