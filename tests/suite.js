@@ -1,6 +1,7 @@
 // Shared test suite. Runs under Node (tests/run-node.js) or the browser (tests/index.html).
 import { createRotationEngine } from '../js/rotation-engine.js';
 import { acceptMessage } from '../js/messaging.js';
+import { createTimer, formatRemaining } from '../js/timer.js';
 
 const S = 1000;
 const widgets = () => [
@@ -144,5 +145,48 @@ export function register(test, assert) {
     assert.equal(msg('https://app.example', { source: 'other', type: 'ready' }), null);
     assert.equal(msg('https://app.example', { source: 'pi-tiles', type: 'nope' }), null);
     assert.equal(msg('https://app.example', 'ready'), null);
+  });
+
+  test('timer counts down, pauses, resumes and finishes once', () => {
+    const t = createTimer({ focusMinutes: 1, breakMinutes: 1 });
+    assert.equal(t.getState(0).status, 'idle');
+    t.start(0);
+    assert.equal(t.getState(20 * S).remainingMs, 40 * S);
+    t.pause(20 * S);
+    assert.equal(t.getState(500 * S).remainingMs, 40 * S);
+    t.start(100 * S);
+    assert.equal(t.tick(139 * S), null);
+    assert.equal(t.tick(140 * S), 'finish');
+    assert.equal(t.tick(141 * S), null);
+    assert.equal(t.getState(141 * S).status, 'done');
+  });
+
+  test('timer: after finishing, start switches focus <-> break', () => {
+    const t = createTimer({ focusMinutes: 25, breakMinutes: 5 });
+    t.start(0);
+    t.tick(25 * 60 * S);
+    assert.equal(t.getState(0).nextMode, 'break');
+    t.start(26 * 60 * S);
+    const s = t.getState(26 * 60 * S);
+    assert.equal(s.mode, 'break');
+    assert.equal(s.status, 'running');
+    assert.equal(s.remainingMs, 5 * 60 * S);
+  });
+
+  test('timer reset and setMode stop a running session', () => {
+    const t = createTimer({ focusMinutes: 25, breakMinutes: 5 });
+    t.start(0);
+    t.setMode('break');
+    assert.equal(t.getState(10 * S).status, 'idle');
+    assert.equal(t.getState(10 * S).remainingMs, 5 * 60 * S);
+    t.start(0);
+    t.reset();
+    assert.equal(t.getState(1).remainingMs, 5 * 60 * S);
+  });
+
+  test('formatRemaining rounds up to whole seconds', () => {
+    assert.equal(formatRemaining(25 * 60 * S), '25:00');
+    assert.equal(formatRemaining(59.2 * S), '01:00');
+    assert.equal(formatRemaining(0), '00:00');
   });
 }

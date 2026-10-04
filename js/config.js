@@ -7,7 +7,7 @@ export function normalizeConfig(raw) {
   const seen = new Set();
 
   for (const w of raw.widgets || []) {
-    const type = w.type === 'clock' ? 'clock' : 'iframe';
+    const type = ['clock', 'timer'].includes(w.type) ? w.type : 'iframe';
     if (type === 'iframe') {
       try {
         new URL(w.url);
@@ -29,6 +29,8 @@ export function normalizeConfig(raw) {
       durationSeconds: w.durationSeconds > 0 ? w.durationSeconds : DEFAULT_DURATION_S,
       refreshMinutes: w.refreshMinutes > 0 ? w.refreshMinutes : 0,
       inRotation: w.inRotation !== false,
+      focusMinutes: w.focusMinutes > 0 ? w.focusMinutes : 25,
+      breakMinutes: w.breakMinutes > 0 ? w.breakMinutes : 5,
     });
   }
 

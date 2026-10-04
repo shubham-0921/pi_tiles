@@ -3,6 +3,7 @@
 // torn down (src=about:blank, then removed) on deactivate().
 
 import { createFlipCard } from './flip.js';
+import { createTimer, formatRemaining } from './timer.js';
 
 const LOAD_TIMEOUT_MS = 15000;
 
@@ -160,5 +161,96 @@ export function createIframeWidget(el, widget, hooks) {
       if (iframe) iframe.blur();
     },
     hasFocus: () => !!iframe && document.activeElement === iframe,
+  };
+}
+
+// Native pomodoro widget. The timer keeps running while the slide is off screen;
+// hooks.onFinish() lets the app bring the slide forward.
+export function createTimerWidget(el, widget, hooks) {
+  el.innerHTML = `
+    <div class="timer">
+      <div class="timer-tabs">
+        <button type="button" data-mode="focus">Focus</button>
+        <button type="button" data-mode="break">Break</button>
+      </div>
+      <div class="timer-time"></div>
+      <div class="timer-status"></div>
+      <div class="timer-bar"><div class="timer-fill"></div></div>
+      <div class="timer-actions">
+        <button type="button" class="t-main"></button>
+        <button type="button" class="t-reset">Reset</button>
+      </div>
+    </div>`;
+  const root = el.querySelector('.timer');
+  const time = el.querySelector('.timer-time');
+  const status = el.querySelector('.timer-status');
+  const fill = el.querySelector('.timer-fill');
+  const main = el.querySelector('.t-main');
+  const tabs = [...el.querySelectorAll('.timer-tabs button')];
+
+  const timer = createTimer(widget);
+  let last = '';
+
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.35, 0.7].forEach((t) => {
+        const osc = ctx.createOscillator();
+        osc.frequency.value = 880;
+        osc.connect(ctx.destination);
+        osc.start(ctx.currentTime + t);
+        osc.stop(ctx.currentTime + t + 0.2);
+      });
+      setTimeout(() => ctx.close(), 1500);
+    } catch {
+      // no audio device or blocked: the on-screen "Time's up" still shows
+    }
+  }
+
+  function render(now) {
+    const s = timer.getState(now);
+    const text = formatRemaining(s.remainingMs);
+    const key = `${s.mode}|${s.status}|${text}`;
+    if (key === last) return;
+    last = key;
+    time.textContent = text;
+    status.textContent = s.status === 'paused' ? 'Paused' : s.status === 'done' ? "Time's up!" : '';
+    root.dataset.status = s.status;
+    fill.style.transform = `scaleX(${s.progress})`;
+    tabs.forEach((b) => b.classList.toggle('on', b.dataset.mode === s.mode));
+    main.textContent = { idle: 'Start', running: 'Pause', paused: 'Resume' }[s.status]
+      ?? `Start ${s.nextMode}`;
+  }
+
+  main.addEventListener('click', () => {
+    const now = Date.now();
+    if (timer.getState(now).status === 'running') timer.pause(now);
+    else timer.start(now);
+    render(now);
+  });
+  el.querySelector('.t-reset').addEventListener('click', () => { timer.reset(); render(Date.now()); });
+  tabs.forEach((b) => b.addEventListener('click', () => { timer.setMode(b.dataset.mode); render(Date.now()); }));
+
+  render(Date.now());
+
+  return {
+    type: 'timer',
+    activate() { render(Date.now()); },
+    deactivate() {},
+    owns: () => false,
+    maybeRefresh() {},
+    // Driven by the app's single timer, also while the slide is hidden.
+    tick(now) {
+      if (timer.tick(now) === 'finish') {
+        beep();
+        hooks.onFinish();
+      }
+      render(now);
+    },
+    // Shown in the pill while a session is in progress.
+    label() {
+      const s = timer.getState(Date.now());
+      return s.status === 'idle' ? null : formatRemaining(s.remainingMs);
+    },
   };
 }

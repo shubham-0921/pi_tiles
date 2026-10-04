@@ -57,11 +57,12 @@ The page must be served from `http://localhost:*` (not `file://`) because your a
 | --- | --- |
 | `id` | unique key |
 | `name`, `icon` | pill label (emoji) |
-| `type` | `"clock"` or `"iframe"` |
+| `type` | `"clock"`, `"iframe"` or `"timer"` (native pomodoro) |
 | `url` | iframe URL (iframe only) |
 | `durationSeconds` | time on screen in ambient mode (default 20) |
 | `refreshMinutes` | reload interval; `0` = off |
 | `inRotation` | `false` = reachable by tap/swipe only |
+| `focusMinutes`, `breakMinutes` | timer only (defaults 25 / 5). The countdown shows in the pill while running, and the slide jumps forward with a beep when it ends |
 
 The Clock is always slide 0 and always in rotation. If `widgets.json` is missing, the loader falls back to `widgets.example.json`.
 

@@ -126,6 +126,53 @@ html, body {
 .clock-day { margin-top: 2vh; font-size: min(3.8vw, 5vh); font-weight: 500; }
 .clock-date { margin-top: 0.5vh; font-size: min(3vw, 4vh); color: var(--muted); }
 
+/* --- pomodoro timer */
+.timer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+}
+.timer-tabs { display: flex; gap: 8px; }
+.timer-tabs button {
+  min-width: 120px;
+  min-height: 48px;
+  border: 0;
+  border-radius: 24px;
+  background: var(--panel);
+  color: var(--muted);
+  font: inherit;
+  font-size: 20px;
+}
+.timer-tabs button.on { background: var(--panel-active); color: var(--text); }
+.timer-time {
+  font-size: min(44vh, 26vw);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: #d3d7e0;
+}
+.timer[data-status="done"] .timer-time { color: var(--accent); }
+.timer-status { min-height: 1.4em; font-size: 24px; color: var(--muted); }
+.timer-bar { width: min(70vw, 560px); height: 6px; border-radius: 3px; background: var(--panel); overflow: hidden; }
+.timer-fill { height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left center; }
+.timer-actions { display: flex; gap: 16px; }
+.timer-actions button {
+  min-width: 170px;
+  min-height: 56px;
+  border: 0;
+  border-radius: 28px;
+  font: inherit;
+  font-size: 22px;
+  font-weight: 600;
+  background: var(--panel-active);
+  color: var(--text);
+}
+.timer-actions .t-main { background: var(--accent); color: #04202e; }
+
 /* --- swipe zones (transparent) */
 .swipe-zone {
   position: fixed;

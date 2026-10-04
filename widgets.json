@@ -29,6 +29,17 @@
       "durationSeconds": 20,
       "refreshMinutes": 10,
       "inRotation": true
+    },
+    {
+      "id": "pomodoro",
+      "name": "Pomodoro",
+      "icon": "🍅",
+      "type": "timer",
+      "focusMinutes": 25,
+      "breakMinutes": 5,
+      "durationSeconds": 20,
+      "refreshMinutes": 0,
+      "inRotation": false
     }
   ]
 }

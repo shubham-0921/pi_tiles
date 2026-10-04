@@ -1,7 +1,7 @@
 import { loadConfig } from './config.js';
 import { createRotationEngine } from './rotation-engine.js';
 import { createSlider, attachSwipeZones } from './slider.js';
-import { createClockWidget, createIframeWidget } from './widgets.js';
+import { createClockWidget, createIframeWidget, createTimerWidget } from './widgets.js';
 import { allowedOrigins, attachMessaging } from './messaging.js';
 
 const TICK_MS = 500;
@@ -21,14 +21,14 @@ async function boot() {
 
   // --- slides + widget controllers
   const slideEls = widgets.map(() => document.createElement('section'));
-  const controllers = widgets.map((w, i) =>
-    w.type === 'clock'
-      ? createClockWidget(slideEls[i])
-      : createIframeWidget(slideEls[i], w, {
-          onReady: () => engine.setSkipped(w.id, false),
-          onAuthRequired: () => engine.setSkipped(w.id, true),
-        }),
-  );
+  const controllers = widgets.map((w, i) => {
+    if (w.type === 'clock') return createClockWidget(slideEls[i]);
+    if (w.type === 'timer') return createTimerWidget(slideEls[i], w, { onFinish: () => engine.goTo(i) });
+    return createIframeWidget(slideEls[i], w, {
+      onReady: () => engine.setSkipped(w.id, false),
+      onAuthRequired: () => engine.setSkipped(w.id, true),
+    });
+  });
   const slider = createSlider($('#stage'), slideEls);
   const clock = controllers[0];
   controllers[0].activate();
@@ -43,7 +43,7 @@ async function boot() {
     pill.querySelector('.pill-name').textContent = w.name;
     pill.addEventListener('click', () => engine.goTo(i));
     $('#bar').appendChild(pill);
-    return { el: pill, fill: pill.querySelector('.fill') };
+    return { el: pill, fill: pill.querySelector('.fill'), name: pill.querySelector('.pill-name') };
   });
 
   // Fullscreen toggle (hidden once fullscreen, and on the Pi where kiosk is already full screen)
@@ -142,6 +142,12 @@ async function boot() {
     clock.update(date);
     const ambient = engine.getState().mode === 'ambient';
     controllers.forEach((c) => c.maybeRefresh(now, ambient));
+    controllers.forEach((c, i) => {
+      if (!c.tick) return;
+      c.tick(Date.now());
+      const label = c.label() ?? widgets[i].name;
+      if (pills[i].name.textContent !== label) pills[i].name.textContent = label;
+    });
   }, TICK_MS);
 
   clock.update(new Date());
