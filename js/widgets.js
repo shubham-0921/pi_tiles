@@ -2,20 +2,33 @@
 // Iframe widgets keep NO iframe while inactive: it is created on activate() and
 // torn down (src=about:blank, then removed) on deactivate().
 
+import { createFlipCard } from './flip.js';
+
 const LOAD_TIMEOUT_MS = 15000;
 
 export function createClockWidget(el) {
   el.innerHTML = `
     <div class="clock">
-      <div class="clock-time"></div>
+      <div class="flip-row"></div>
       <div class="clock-day"></div>
       <div class="clock-date"></div>
       <div class="clock-next"></div>
     </div>`;
-  const time = el.querySelector('.clock-time');
+  const row = el.querySelector('.flip-row');
   const day = el.querySelector('.clock-day');
   const date = el.querySelector('.clock-date');
   const next = el.querySelector('.clock-next');
+
+  const hours = createFlipCard();
+  const minutes = createFlipCard();
+  hours.el.classList.add('hours');
+  minutes.el.classList.add('minutes');
+  const ampm = document.createElement('span');
+  ampm.className = 'ampm';
+  hours.el.appendChild(ampm);
+  row.append(hours.el, minutes.el);
+
+  let active = false; // only animate flips while the slide is on screen
 
   const set = (node, text) => {
     if (node.textContent !== text) node.textContent = text;
@@ -23,12 +36,17 @@ export function createClockWidget(el) {
 
   return {
     type: 'clock',
-    activate() {},
-    deactivate() {},
+    activate() { active = true; },
+    deactivate() { active = false; },
     owns: () => false,
     maybeRefresh() {},
     update(now) {
-      set(time, now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }));
+      const h = now.getHours();
+      const h12 = String(h % 12 || 12);
+      hours.el.classList.toggle('two', h12.length === 2);
+      hours.set(h12, active);
+      minutes.set(String(now.getMinutes()).padStart(2, '0'), active);
+      set(ampm, h < 12 ? 'AM' : 'PM');
       set(day, now.toLocaleDateString([], { weekday: 'long' }));
       set(date, now.toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' }));
     },

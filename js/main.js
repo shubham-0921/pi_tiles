@@ -47,6 +47,22 @@ async function boot() {
     return { el: pill, fill: pill.querySelector('.fill') };
   });
 
+  // Fullscreen toggle (hidden once fullscreen, and on the Pi where kiosk is already full screen)
+  const fs = document.createElement('button');
+  fs.type = 'button';
+  fs.id = 'fs';
+  fs.setAttribute('aria-label', 'Full screen');
+  fs.textContent = '⛶';
+  fs.addEventListener('click', () => document.documentElement.requestFullscreen().catch(() => {}));
+  $('#bar').appendChild(fs);
+  const syncFs = () => {
+    const full = !!document.fullscreenElement || window.innerHeight >= screen.height - 1;
+    fs.hidden = full || !document.fullscreenEnabled;
+  };
+  document.addEventListener('fullscreenchange', syncFs);
+  window.addEventListener('resize', syncFs);
+  syncFs();
+
   const badge = $('#pause-badge');
   const dim = $('#dim');
   let activePill = -1;
