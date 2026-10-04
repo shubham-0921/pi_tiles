@@ -11,7 +11,6 @@ A full-screen slider for a Raspberry Pi 3B+ (1 GB) running Chromium in kiosk mod
 - **Memory**: only one iframe exists at a time. It is created after its slide settles and removed (`src=about:blank`, then `remove()`) when the slide leaves.
 - **States**: loading skeleton → ready; "Couldn't load X" + Retry after 15 s of silence; "Sign in needed…" on `auth-required` (widget is skipped in rotation until it reports ready, e.g. after a manual visit and Retry).
 - **Auto-refresh**: the iframe reloads every `refreshMinutes`, only while it is the active slide and the user is not interacting.
-- **Night mode**: a flat translucent layer dims everything between `nightMode.start` and `end`.
 
 ## Layout
 
@@ -22,7 +21,6 @@ js/slider.js            transform-only slide transitions + edge swipe zones
 js/widgets.js           clock + iframe widget controllers (lifecycle, states)
 js/messaging.js         postMessage bridge with origin checks
 js/config.js            widgets.json loader / normaliser
-js/night.js             night-window check
 js/main.js              wiring + a single 500 ms timer
 tests/                  engine tests (Node or browser)
 deploy/                 systemd unit + labwc autostart
@@ -48,7 +46,6 @@ The page must be served from `http://localhost:*` (not `file://`) because your a
 ```json
 {
   "idleTimeoutSeconds": 75,
-  "nightMode": { "start": "23:00", "end": "07:00" },
   "widgets": [
     { "id": "clock", "name": "Clock", "icon": "🕐", "type": "clock", "durationSeconds": 20, "refreshMinutes": 0, "inRotation": true },
     { "id": "bolkar", "name": "Bolkar", "icon": "🎙", "type": "iframe", "url": "https://…", "durationSeconds": 20, "refreshMinutes": 10, "inRotation": true }

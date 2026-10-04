@@ -46,7 +46,6 @@ export function normalizeConfig(raw) {
 
   return {
     idleTimeoutSeconds: raw.idleTimeoutSeconds > 0 ? raw.idleTimeoutSeconds : 75,
-    nightMode: raw.nightMode && raw.nightMode.start && raw.nightMode.end ? raw.nightMode : null,
     widgets,
   };
 }

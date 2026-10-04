@@ -1,6 +1,5 @@
 {
   "idleTimeoutSeconds": 75,
-  "nightMode": { "start": "23:00", "end": "07:00" },
   "widgets": [
     {
       "id": "clock",

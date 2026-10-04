@@ -3,7 +3,6 @@ import { createRotationEngine } from './rotation-engine.js';
 import { createSlider, attachSwipeZones } from './slider.js';
 import { createClockWidget, createIframeWidget } from './widgets.js';
 import { allowedOrigins, attachMessaging } from './messaging.js';
-import { isNight } from './night.js';
 
 const TICK_MS = 500;
 const params = new URLSearchParams(location.search);
@@ -64,7 +63,6 @@ async function boot() {
   syncFs();
 
   const badge = $('#pause-badge');
-  const dim = $('#dim');
   let activePill = -1;
 
   function render() {
@@ -134,7 +132,6 @@ async function boot() {
 
   // --- single timer drives everything
   let last = performance.now();
-  let night = null;
   setInterval(() => {
     const now = performance.now();
     const dt = Math.min(now - last, 5000) * SPEED;
@@ -147,12 +144,6 @@ async function boot() {
     clock.update(date);
     const ambient = engine.getState().mode === 'ambient';
     controllers.forEach((c) => c.maybeRefresh(now, ambient));
-
-    const n = isNight(date, config.nightMode);
-    if (n !== night) {
-      night = n;
-      dim.classList.toggle('on', n);
-    }
   }, TICK_MS);
 
   clock.update(new Date());

@@ -1,6 +1,5 @@
 // Shared test suite. Runs under Node (tests/run-node.js) or the browser (tests/index.html).
 import { createRotationEngine } from '../js/rotation-engine.js';
-import { isNight } from '../js/night.js';
 import { acceptMessage } from '../js/messaging.js';
 
 const S = 1000;
@@ -136,16 +135,6 @@ export function register(test, assert) {
     assert.equal(events.length, 0);
   });
 
-  test('isNight handles windows that wrap midnight', () => {
-    const night = { start: '23:00', end: '07:00' };
-    const at = (h, m) => new Date(2026, 0, 1, h, m);
-    assert.equal(isNight(at(22, 59), night), false);
-    assert.equal(isNight(at(23, 0), night), true);
-    assert.equal(isNight(at(3, 30), night), true);
-    assert.equal(isNight(at(7, 0), night), false);
-    assert.equal(isNight(at(12, 0), night), false);
-    assert.equal(isNight(at(12, 0), null), false);
-  });
 
   test('acceptMessage enforces origin, source tag and type', () => {
     const origins = new Set(['https://app.example']);
