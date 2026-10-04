@@ -12,12 +12,10 @@ export function createClockWidget(el) {
       <div class="flip-row"></div>
       <div class="clock-day"></div>
       <div class="clock-date"></div>
-      <div class="clock-next"></div>
     </div>`;
   const row = el.querySelector('.flip-row');
   const day = el.querySelector('.clock-day');
   const date = el.querySelector('.clock-date');
-  const next = el.querySelector('.clock-next');
 
   const hours = createFlipCard();
   const minutes = createFlipCard();
@@ -49,9 +47,6 @@ export function createClockWidget(el) {
       set(ampm, h < 12 ? 'AM' : 'PM');
       set(day, now.toLocaleDateString([], { weekday: 'long' }));
       set(date, now.toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' }));
-    },
-    setNext(text) {
-      set(next, text);
     },
   };
 }

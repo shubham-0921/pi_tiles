@@ -76,7 +76,7 @@ html, body {
   align-items: center;
   justify-content: center;
 }
-.flip-row { display: flex; gap: 0.5vw; font-size: min(36vh, 24vw); }
+.flip-row { display: flex; gap: 0.5vw; font-size: min(48vh, 30vw); }
 .flip {
   --h: 1.1em;
   --card: #1a1d24;
@@ -123,14 +123,8 @@ html, body {
   z-index: 3;
 }
 .ampm { position: absolute; left: 0.08em; top: 0.03em; z-index: 4; font-size: 0.13em; font-weight: 600; color: var(--muted); }
-.clock-day { margin-top: 3vh; font-size: min(5.5vw, 7vh); font-weight: 500; }
-.clock-date { margin-top: 0.5vh; font-size: min(4vw, 5vh); color: var(--muted); }
-.clock-next {
-  position: absolute;
-  bottom: 2.5vh;
-  font-size: min(3.2vw, 4.5vh);
-  color: var(--muted);
-}
+.clock-day { margin-top: 2vh; font-size: min(3.8vw, 5vh); font-weight: 500; }
+.clock-date { margin-top: 0.5vh; font-size: min(3vw, 4vh); color: var(--muted); }
 
 /* --- swipe zones (transparent) */
 .swipe-zone {

@@ -72,8 +72,6 @@ async function boot() {
       pills[s.index].el.classList.add('active');
       activePill = s.index;
     }
-    const next = widgets[s.nextIndex];
-    clock.setNext(s.nextIndex === s.index ? '' : `up next: ${next.icon} ${next.name}`);
     pills[s.index].fill.style.transform = `scaleX(${s.progress})`;
 
     if (s.mode === 'interactive') {
