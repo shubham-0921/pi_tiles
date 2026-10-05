@@ -22,6 +22,13 @@ export function createScheduler(widgets, now0, firstDelayMs = FIRST_DELAY_MS) {
       const item = find(w);
       item.next = now + item.every;
     },
+    // True (once) if this widget's refresh is due; the caller then does the refresh itself.
+    take(w, now) {
+      const item = find(w);
+      if (!item || now < item.next) return false;
+      item.next = now + item.every;
+      return true;
+    },
     retry(w, now, delayMs = RETRY_MS) {
       find(w).next = now + delayMs;
     },
@@ -46,6 +53,8 @@ export function createBackgroundRefresher(widgets, { canRun, now = performance.n
   }
 
   return {
+    busy: () => !!frame,
+    takeDue: (w, nowMs) => scheduler.take(w, nowMs),
     tick(nowMs) {
       if (frame || !canRun()) return;
       const widget = scheduler.due(nowMs);

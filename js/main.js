@@ -32,7 +32,8 @@ async function boot() {
   });
   // Keeps cache-backed iframes (Bolkar) fresh behind the scenes, only while no iframe is visible.
   const background = createBackgroundRefresher(widgets, {
-    canRun: () => controllers[engine.getState().index].type !== 'iframe',
+    canRun: () =>
+      controllers[engine.getState().index].type !== 'iframe' && !controllers.some((c) => c.isLoaded?.()),
   });
   const slider = createSlider($('#stage'), slideEls);
   const clock = controllers[0];
@@ -91,12 +92,12 @@ async function boot() {
   engine.subscribe((e) => {
     if (e.type === 'mode') render();
     if (e.type !== 'slide') return;
-    controllers[e.from].deactivate();
+    // Drop every other iframe (including a preloaded one) so only the target stays.
+    controllers.forEach((c, i) => { if (i !== e.to) c.deactivate(); });
     if (controllers[e.to].type === 'iframe') background.abort(performance.now());
-    slider.show(e.to, e.direction, () => {
-      // Create the iframe only after the slide has settled, and only if still current.
-      if (engine.getState().index === e.to) controllers[e.to].activate();
-    });
+    // Start loading right away so the site is already painting while the slide moves in.
+    controllers[e.to].activate();
+    slider.show(e.to, e.direction);
     render();
   });
 
@@ -149,6 +150,14 @@ async function boot() {
     const ambient = engine.getState().mode === 'ambient';
     controllers.forEach((c) => c.maybeRefresh(now, ambient));
     background.tick(now);
+    // Preload the next iframe slide while a non-iframe slide (Clock/Pomodoro) is showing,
+    // so it is ready on arrival. Never overlaps another iframe, so memory stays flat.
+    const st = engine.getState();
+    const nextWidget = controllers[st.nextIndex];
+    if (st.mode === 'ambient' && st.nextIndex !== st.index && controllers[st.index].type !== 'iframe'
+        && nextWidget.type === 'iframe' && !background.busy()) {
+      nextWidget.prewarm(background.takeDue(widgets[st.nextIndex], now));
+    }
     controllers.forEach((c, i) => {
       if (!c.tick) return;
       c.tick(Date.now());

@@ -56,11 +56,6 @@ export function createClockWidget(el) {
 export function createIframeWidget(el, widget, hooks) {
   el.innerHTML = `
     <div class="frame-host"></div>
-    <div class="overlay skeleton" hidden>
-      <div class="skel-icon"></div>
-      <div class="skel-name"></div>
-      <div class="skel-bar"></div><div class="skel-bar short"></div>
-    </div>
     <div class="overlay message" hidden>
       <div class="msg-text"></div>
       <div class="msg-actions">
@@ -69,12 +64,9 @@ export function createIframeWidget(el, widget, hooks) {
       </div>
     </div>`;
   const host = el.querySelector('.frame-host');
-  const skeleton = el.querySelector('.skeleton');
   const message = el.querySelector('.message');
   const msgText = el.querySelector('.msg-text');
   const openExt = el.querySelector('.open-ext');
-  el.querySelector('.skel-icon').textContent = widget.icon;
-  el.querySelector('.skel-name').textContent = `Loading ${widget.name}…`;
 
   let iframe = null;
   let state = 'idle'; // idle | loading | ready | error | auth
@@ -84,7 +76,6 @@ export function createIframeWidget(el, widget, hooks) {
 
   function setState(next) {
     state = next;
-    skeleton.hidden = next !== 'loading';
     message.hidden = next !== 'error' && next !== 'auth';
     openExt.hidden = next !== 'auth';
     if (next === 'error') msgText.textContent = `Couldn't load ${widget.name}`;
@@ -109,7 +100,8 @@ export function createIframeWidget(el, widget, hooks) {
     hooks.onReady();
   }
 
-  function load() {
+  // refresh: ask the app to refetch its data (used when a preload doubles as a background refresh)
+  function load(refresh = false) {
     destroy();
     setState('loading');
     iframe = document.createElement('iframe');
@@ -118,6 +110,11 @@ export function createIframeWidget(el, widget, hooks) {
       if (state === 'loading') markReady(); // fallback when the app sends no "ready"
     };
     iframe.src = widget.url;
+    if (refresh) {
+      const u = new URL(widget.url);
+      u.searchParams.set('refresh', '1');
+      iframe.src = u.href;
+    }
     host.appendChild(iframe);
     loadTimer = setTimeout(() => {
       if (state !== 'loading') return;
@@ -126,7 +123,13 @@ export function createIframeWidget(el, widget, hooks) {
     }, LOAD_TIMEOUT_MS);
   }
 
-  el.querySelector('.retry').addEventListener('click', load);
+  el.querySelector('.retry').addEventListener('click', () => load());
+  // After signing in via "Open in browser", recheck as soon as the user comes back to this window.
+  const recheck = () => {
+    if (active && state === 'auth' && !document.hidden) load();
+  };
+  document.addEventListener('visibilitychange', recheck);
+  window.addEventListener('focus', recheck);
   // Google refuses to render its sign-in page inside an iframe, so log in in a real window.
   openExt.addEventListener('click', () => window.open(widget.url, '_blank'));
 
@@ -135,8 +138,16 @@ export function createIframeWidget(el, widget, hooks) {
     id: widget.id,
     activate() {
       active = true;
+      // A preloaded iframe is already loading or ready: just keep it.
+      if (iframe && (state === 'loading' || state === 'ready')) return;
       load();
     },
+    // Load while the slide is still off screen so it is ready when it slides in.
+    prewarm(refresh = false) {
+      if (active || iframe) return;
+      load(refresh);
+    },
+    isLoaded: () => !!iframe,
     deactivate() {
       active = false;
       destroy();

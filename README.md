@@ -9,7 +9,7 @@ A full-screen slider for a Raspberry Pi 3B+ (1 GB) running Chromium in kiosk mod
 - **Bottom bar**: one pill per widget. The active pill has a progress line that freezes while paused; a badge shows the idle countdown. Tap a pill to jump.
 - **Edge swipes**: 40 px transparent zones on the left/right edges navigate prev/next. Swipes inside an iframe belong to the site.
 - **Memory**: only one iframe exists at a time. It is created after its slide settles and removed (`src=about:blank`, then `remove()`) when the slide leaves.
-- **States**: loading skeleton → ready; "Couldn't load X" + Retry after 15 s of silence; "Sign in needed…" on `auth-required` (widget is skipped in rotation until it reports ready, e.g. after a manual visit and Retry).
+- **Loading**: no loading screen. The iframe starts loading as the slide begins to move in, and when the previous slide is the Clock or Pomodoro the next site is preloaded (still just one iframe at a time) so it is ready on arrival. States: "Couldn't load X" + Retry after 15 s of silence; "Sign in needed…" on `auth-required` (widget is skipped in rotation until it reports ready, e.g. after a manual visit and Retry).
 - **Auto-refresh**: the iframe reloads every `refreshMinutes`, only while it is the active slide and the user is not interacting.
 
 ## Layout
