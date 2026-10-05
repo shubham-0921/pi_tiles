@@ -124,14 +124,12 @@ async function boot() {
   });
 
   // Fallback: a tap inside an iframe gives it focus, which blurs the parent window.
-  // Hand focus back so the next tap blurs (and is detected) again.
+  // This only catches the first tap; apps should send "interaction" pings for the rest.
+  // We deliberately do NOT take focus back from the iframe: that can disturb touch input.
   window.addEventListener('blur', () => {
     setTimeout(() => {
       const c = controllers[engine.getState().index];
-      if (c.hasFocus && c.hasFocus()) {
-        engine.interact();
-        c.releaseFocus();
-      }
+      if (c.hasFocus && c.hasFocus()) engine.interact();
     }, 0);
   });
 

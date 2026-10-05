@@ -167,10 +167,6 @@ export function createIframeWidget(el, widget, hooks) {
       if (!active || !ambient || state !== 'ready' || !widget.refreshMinutes) return;
       if (nowMs - loadedAt >= widget.refreshMinutes * 60000) load();
     },
-    // Called when the parent window blurred because the iframe took focus.
-    releaseFocus() {
-      if (iframe) iframe.blur();
-    },
     hasFocus: () => !!iframe && document.activeElement === iframe,
   };
 }

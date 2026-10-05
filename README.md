@@ -91,7 +91,7 @@ if (window.parent !== window) {
 
 Pi Tiles only accepts messages whose `event.origin` is the origin of a configured widget URL **and** whose `event.source` is the currently loaded iframe.
 
-Fallback if an app sends nothing: when the parent window `blur`s while an iframe slide is active (a tap gave the iframe focus), Pi Tiles treats it as interaction and hands focus back so the next tap is detected too. This only catches the first tap after focus changes, so apps should still send `interaction` pings for scrolling and long sessions.
+Fallback if an app sends nothing: when the parent window `blur`s while an iframe slide is active (a tap gave the iframe focus), Pi Tiles treats it as interaction. It does not take focus back from the iframe (that can disturb touch input), so it only catches the first tap; apps should send `interaction` pings for everything after that.
 
 ## Raspberry Pi setup (Raspberry Pi OS Bookworm 64-bit, with desktop)
 

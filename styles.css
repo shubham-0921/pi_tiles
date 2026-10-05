@@ -179,6 +179,11 @@ html, body {
 }
 .swipe-zone.left { left: 0; }
 .swipe-zone.right { right: 0; }
+/* The zones are for finger swipes. With a mouse as the main input they would only cover the
+   apps' scrollbars (Trace's is on the left edge) and block the wheel, so turn them off. */
+@media (hover: hover) and (pointer: fine) {
+  .swipe-zone { display: none; }
+}
 
 /* --- pause badge */
 #pause-badge {
