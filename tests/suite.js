@@ -2,6 +2,7 @@
 import { createRotationEngine } from '../js/rotation-engine.js';
 import { acceptMessage } from '../js/messaging.js';
 import { createTimer, formatRemaining } from '../js/timer.js';
+import { createScheduler } from '../js/background.js';
 
 const S = 1000;
 const widgets = () => [
@@ -188,5 +189,27 @@ export function register(test, assert) {
     assert.equal(formatRemaining(25 * 60 * S), '25:00');
     assert.equal(formatRemaining(59.2 * S), '01:00');
     assert.equal(formatRemaining(0), '00:00');
+  });
+
+  test('background scheduler: first run after a short delay, then every interval', () => {
+    const w = { type: 'iframe', backgroundRefreshMinutes: 5 };
+    const clock = { type: 'clock' };
+    const s = createScheduler([clock, w], 0, 5 * S);
+    assert.equal(s.due(4 * S), null);
+    assert.equal(s.due(5 * S), w);
+    s.done(w, 5 * S);
+    assert.equal(s.due(5 * S + 299 * S), null);
+    assert.equal(s.due(5 * S + 300 * S), w);
+  });
+
+  test('background scheduler ignores widgets without it and retries after abort', () => {
+    const off = { type: 'iframe', backgroundRefreshMinutes: 0 };
+    const on = { type: 'iframe', backgroundRefreshMinutes: 5 };
+    const s = createScheduler([off, on], 0, 0);
+    assert.equal(s.due(0), on);
+    s.done(on, 0);
+    s.retry(on, 100 * S, 30 * S);
+    assert.equal(s.due(129 * S), null);
+    assert.equal(s.due(130 * S), on);
   });
 }

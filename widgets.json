@@ -17,8 +17,9 @@
       "type": "iframe",
       "url": "https://bolkar-lac.vercel.app/analytics/full?key=a9ebfa56e3b40aec5354ef7e134c30d3&kiosk=1",
       "durationSeconds": 20,
-      "refreshMinutes": 10,
-      "inRotation": true
+      "refreshMinutes": 0,
+      "inRotation": true,
+      "backgroundRefreshMinutes": 5
     },
     {
       "id": "trace",

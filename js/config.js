@@ -29,6 +29,7 @@ export function normalizeConfig(raw) {
       durationSeconds: w.durationSeconds > 0 ? w.durationSeconds : DEFAULT_DURATION_S,
       refreshMinutes: w.refreshMinutes > 0 ? w.refreshMinutes : 0,
       inRotation: w.inRotation !== false,
+      backgroundRefreshMinutes: w.backgroundRefreshMinutes > 0 ? w.backgroundRefreshMinutes : 0,
       focusMinutes: w.focusMinutes > 0 ? w.focusMinutes : 25,
       breakMinutes: w.breakMinutes > 0 ? w.breakMinutes : 5,
     });

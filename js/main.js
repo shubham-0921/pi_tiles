@@ -3,6 +3,7 @@ import { createRotationEngine } from './rotation-engine.js';
 import { createSlider, attachSwipeZones } from './slider.js';
 import { createClockWidget, createIframeWidget, createTimerWidget } from './widgets.js';
 import { allowedOrigins, attachMessaging } from './messaging.js';
+import { createBackgroundRefresher } from './background.js';
 
 const TICK_MS = 500;
 const params = new URLSearchParams(location.search);
@@ -28,6 +29,10 @@ async function boot() {
       onReady: () => engine.setSkipped(w.id, false),
       onAuthRequired: () => engine.setSkipped(w.id, true),
     });
+  });
+  // Keeps cache-backed iframes (Bolkar) fresh behind the scenes, only while no iframe is visible.
+  const background = createBackgroundRefresher(widgets, {
+    canRun: () => controllers[engine.getState().index].type !== 'iframe',
   });
   const slider = createSlider($('#stage'), slideEls);
   const clock = controllers[0];
@@ -87,6 +92,7 @@ async function boot() {
     if (e.type === 'mode') render();
     if (e.type !== 'slide') return;
     controllers[e.from].deactivate();
+    if (controllers[e.to].type === 'iframe') background.abort(performance.now());
     slider.show(e.to, e.direction, () => {
       // Create the iframe only after the slide has settled, and only if still current.
       if (engine.getState().index === e.to) controllers[e.to].activate();
@@ -142,6 +148,7 @@ async function boot() {
     clock.update(date);
     const ambient = engine.getState().mode === 'ambient';
     controllers.forEach((c) => c.maybeRefresh(now, ambient));
+    background.tick(now);
     controllers.forEach((c, i) => {
       if (!c.tick) return;
       c.tick(Date.now());
